@@ -2,8 +2,8 @@ import socket
 import threading
 
 # Configuration for the central node
-HOST = '127.0.0.1'
-PORT = 9000
+HOST = '172.29.67.89'
+PORT = 9001
 
 # Dictionary to keep track of active peers
 peers = {}
@@ -20,10 +20,12 @@ def handle_client(conn, addr):
                 _, port = data.split()
                 peers[addr[0]] = int(port)
                 conn.sendall(b'Registered')
+                print(f"Registered {addr}")
             elif data.startswith('deregister'):
                 if addr[0] in peers:
                     del peers[addr[0]]
                     conn.sendall(b'Deregistered')
+                print(f"Deregistered {addr}")
             elif data.startswith('query'):
                 response = ', '.join(f"{peer}:{port}" for peer, port in peers.items())
                 conn.sendall(response.encode())
