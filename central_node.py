@@ -18,18 +18,25 @@ def handle_client(conn, addr):
                 _, port, *files = data.split()
                 peers[addr[0]] = {'port': int(port), 'files': files}
                 conn.sendall(b'Registered')
-                print(f"Registered {addr} with files {files}")
+                print(f"Registered {addr[0]}:{port} with files {files}")
             elif data.startswith('deregister'):
                 if addr[0] in peers:
                     del peers[addr[0]]
                     conn.sendall(b'Deregistered')
-                print(f"Deregistered {addr}")
+                print(f"Deregistered {addr[0]}")
             elif data.startswith('query'):
-                response = "Total peers:" + str(len(peers)) + "\nPeers:\n"
-                response += '\n'.join(
+                response = "Total peers:" + str(len(peers)) + "\nPeers:\n"'\n'.join(
                     f"{peer}:{details['port']}:{','.join(details['files'])}" for peer, details in peers.items())
                 conn.sendall(response.encode())
-                print(f"Queried by {addr}")
+                print(f"Queried by {addr[0]}")
+            elif data.startswith('search'):
+                _, filename = data.split(maxsplit=1)
+                matching_peers = {
+                    peer: details for peer, details in peers.items() if filename in details['files']
+                }
+                response = '\n'.join(f"{peer}:{details['port']}" for peer, details in matching_peers.items())
+                conn.sendall(response.encode() if response else b'No match found')
+                print(f"Search for {filename} by {addr[0]}")
 
 
 def main(central_host, central_port):

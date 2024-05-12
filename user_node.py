@@ -28,7 +28,15 @@ def query_peers(central_host, central_port):
         s.connect((central_host, central_port))
         s.sendall('query'.encode())
         response = s.recv(1024)
-        print("Active peers:", response.decode())
+        print(response.decode())
+
+
+def search_file(central_host, central_port, filename):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((central_host, central_port))
+        s.sendall(f'search {filename}'.encode())
+        response = s.recv(1024)
+        print("Search results:", response.decode())
 
 
 def handle_peer_request(conn, addr):
@@ -84,7 +92,8 @@ def main(central_host, central_port, my_port, files):
         print("2 - Deregister from central")
         print("3 - Query peers")
         print("4 - Download a file")
-        print("5 - Exit")
+        print("5 - Search for a file")
+        print("6 - Exit")
         choice = input("Enter your choice: ")
 
         if choice == '1':
@@ -99,6 +108,9 @@ def main(central_host, central_port, my_port, files):
             ip, port = peer.split(':')
             download_file_from_peer(ip, int(port), filename)
         elif choice == '5':
+            filename = input("Enter filename to search: ")
+            search_file(central_host, central_port, filename)
+        elif choice == '6':
             deregister_with_central(central_host, central_port)
             print("Exiting program.")
             file_server_process.terminate()
