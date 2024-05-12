@@ -2,8 +2,8 @@ import socket
 import sys
 
 # Configuration for user node
-CENTRAL_HOST = '127.0.0.1'
-CENTRAL_PORT = 9000
+CENTRAL_HOST = '172.29.67.89'
+CENTRAL_PORT = 9001
 
 def register_with_central(my_port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -27,14 +27,29 @@ def query_peers():
         print("Active peers:", response.decode())
 
 def main(my_port):
-    register_with_central(my_port)
-    input("Press Enter to query peers...")
-    query_peers()
-    input("Press Enter to deregister...")
-    deregister_with_central()
+    while True:
+        print("\nCommands:")
+        print("1 - Register with central")
+        print("2 - Deregister from central")
+        print("3 - Query peers")
+        print("4 - Exit")
+        choice = input("Enter your choice: ")
+
+        if choice == '1':
+            register_with_central(my_port)
+        elif choice == '2':
+            deregister_with_central()
+        elif choice == '3':
+            query_peers()
+        elif choice == '4':
+            print("Exiting program.")
+            break
+        else:
+            print("Invalid choice. Please enter a number from 1 to 4.")
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python user_node.py [PORT]")
         sys.exit(1)
-    main(int(sys.argv[1]))
+    my_port = int(sys.argv[1])
+    main(my_port)
