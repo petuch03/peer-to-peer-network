@@ -22,9 +22,9 @@ def deregister_with_central(central_host, central_port):
         print("Central server response:", response.decode())
 
 
-def query_peers():
+def query_peers(central_host, central_port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((CENTRAL_HOST, CENTRAL_PORT))
+        s.connect((central_host, central_port))
         s.sendall('query'.encode())
         response = s.recv(1024)
         print("Active peers:", response.decode())
