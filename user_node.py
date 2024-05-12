@@ -92,7 +92,7 @@ def main(central_host, central_port, my_port, files):
         elif choice == '2':
             deregister_with_central(central_host, central_port)
         elif choice == '3':
-            query_peers()
+            query_peers(central_host, central_port)
         elif choice == '4':
             peer = input("Enter peer IP and port (ip:port): ")
             filename = input("Enter filename to download: ")
