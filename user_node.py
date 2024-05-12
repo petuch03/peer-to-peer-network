@@ -55,7 +55,6 @@ def start_file_server(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((LOCAL_HOST, port))
         s.listen()
-        print(f"File server listening on port {port}")
         while True:
             conn, addr = s.accept()
             thread = threading.Thread(target=handle_peer_request, args=(conn, addr))
@@ -76,8 +75,8 @@ def download_file_from_peer(ip, port, filename):
 
 
 def main(central_host, central_port, my_port, files):
-    file_server_thread = multiprocessing.Process(target=start_file_server, args=(my_port,))
-    file_server_thread.start()
+    file_server_process = multiprocessing.Process(target=start_file_server, args=(my_port,))
+    file_server_process.start()
 
     while True:
         print("\nCommands:")
@@ -102,7 +101,7 @@ def main(central_host, central_port, my_port, files):
         elif choice == '5':
             deregister_with_central(central_host, central_port)
             print("Exiting program.")
-            file_server_thread.terminate()
+            file_server_process.terminate()
             exit(0)
         else:
             print("Invalid choice. Please enter a number from 1 to 5.")
