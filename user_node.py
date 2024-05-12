@@ -2,6 +2,7 @@ import socket
 import sys
 import threading
 import multiprocessing
+from colorama import Fore
 
 LOCAL_HOST = '0.0.0.0'
 
@@ -36,7 +37,7 @@ def search_file(central_host, central_port, filename):
         s.connect((central_host, central_port))
         s.sendall(f'search {filename}'.encode())
         response = s.recv(1024)
-        print("Search results:", response.decode())
+        print(response.decode())
 
 
 def handle_peer_request(conn, addr):
@@ -52,11 +53,11 @@ def handle_peer_request(conn, addr):
                         if not bytes_read:
                             break
                         conn.sendall(bytes_read)
-                print(f"Sent {filename} to {addr}")
+                print(Fore.RED + f"Sent {filename} to {addr}"+ Fore.RESET)
             except FileNotFoundError:
-                print(f"File not found: {filename}")
+                print(Fore.RED + f"File not found: {filename}" + Fore.RESET)
         else:
-            print("Received unknown command")
+            print(Fore.RED + "Received unknown command" + Fore.RESET)
 
 
 def start_file_server(port):
@@ -103,9 +104,8 @@ def main(central_host, central_port, my_port, files):
         elif choice == '3':
             query_peers(central_host, central_port)
         elif choice == '4':
-            peer = input("Enter peer IP and port (ip:port): ")
-            filename = input("Enter filename to download: ")
-            ip, port = peer.split(':')
+            peer = input("Enter peer IP, port and filename (ip:port:filename): ")
+            ip, port, filename = peer.split(':')
             download_file_from_peer(ip, int(port), filename)
         elif choice == '5':
             filename = input("Enter filename to search: ")
