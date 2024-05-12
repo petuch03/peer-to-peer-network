@@ -1,9 +1,9 @@
 ## How to use
-Launch central node:
+Launch node usage:
 ```bash
-python3 central_node.py
+node src/node.js <PORT>
 ```
-Launch user node on specified port:
+Example:
 ```bash
-python3 user_node.py <PORT>
+node src/node.js 1010
 ```
