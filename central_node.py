@@ -25,8 +25,8 @@ def handle_client(conn, addr):
                     conn.sendall(b'Deregistered')
                 print(f"Deregistered {addr[0]}")
             elif data.startswith('query'):
-                response = "Peers:\n" + '       \n'.join(
-                    f"{peer}:{details['port']}:{','.join(details['files'])}" for peer, details in peers.items())
+                response = "Peers:\n" + '\n'.join(
+                    f"{peer}:{details['port']}:{', '.join(details['files'])}" for peer, details in peers.items())
                 conn.sendall(response.encode())
                 print(f"Queried by {addr[0]}")
             elif data.startswith('search'):
@@ -36,7 +36,7 @@ def handle_client(conn, addr):
                     matched_files = [file for file in details['files'] if filename in file]
                     if matched_files:
                         matching_peers[peer] = {'port': details['port'], 'files': matched_files}
-                response = "Search results:\n" + '      \n'.join(f"{peer}:{details['port']}:{','.join(details['files'])}" for peer, details in matching_peers.items())
+                response = "Search results:\n" + '\n'.join(f"{peer}:{details['port']}:{', '.join(details['files'])}" for peer, details in matching_peers.items())
                 conn.sendall(response.encode() if response else b'No match found')
                 print(f"Search for {filename} by {addr[0]}")
 
