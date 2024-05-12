@@ -2,25 +2,25 @@ import socket
 import sys
 import threading
 
-# Configuration for user node
-CENTRAL_HOST = '172.29.67.89'
-CENTRAL_PORT = 9001
 LOCAL_HOST = '0.0.0.0'
 
-def register_with_central(my_port, files):
+
+def register_with_central(central_host, central_port, my_port, files):
     files_str = ' '.join(files)
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((CENTRAL_HOST, CENTRAL_PORT))
+        s.connect((central_host, central_port))
         s.sendall(f'register {my_port} {files_str}'.encode())
         response = s.recv(1024)
         print("Central server response:", response.decode())
 
-def deregister_with_central():
+
+def deregister_with_central(central_host, central_port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((CENTRAL_HOST, CENTRAL_PORT))
+        s.connect((central_host, central_port))
         s.sendall('deregister'.encode())
         response = s.recv(1024)
         print("Central server response:", response.decode())
+
 
 def query_peers():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -28,6 +28,7 @@ def query_peers():
         s.sendall('query'.encode())
         response = s.recv(1024)
         print("Active peers:", response.decode())
+
 
 def handle_peer_request(conn, addr):
     print(f"Connection from {addr} has been established.")
@@ -48,6 +49,7 @@ def handle_peer_request(conn, addr):
         else:
             print("Received unknown command")
 
+
 def start_file_server(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((LOCAL_HOST, port))
@@ -57,6 +59,7 @@ def start_file_server(port):
             conn, addr = s.accept()
             thread = threading.Thread(target=handle_peer_request, args=(conn, addr))
             thread.start()
+
 
 def download_file_from_peer(ip, port, filename):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -70,7 +73,8 @@ def download_file_from_peer(ip, port, filename):
                 f.write(data)
         print(f"Downloaded {filename} from {ip}:{port}")
 
-def main(my_port, files):
+
+def main(central_host, central_port, my_port, files):
     file_server_thread = threading.Thread(target=start_file_server, args=(my_port,))
     file_server_thread.start()
 
@@ -84,9 +88,9 @@ def main(my_port, files):
         choice = input("Enter your choice: ")
 
         if choice == '1':
-            register_with_central(my_port, files)
+            register_with_central(central_host, central_port, my_port, files)
         elif choice == '2':
-            deregister_with_central()
+            deregister_with_central(central_host, central_port)
         elif choice == '3':
             query_peers()
         elif choice == '4':
@@ -100,10 +104,13 @@ def main(my_port, files):
         else:
             print("Invalid choice. Please enter a number from 1 to 5.")
 
+
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: python user_node.py [PORT] [FILE1] [FILE2] ...")
+    if len(sys.argv) < 5:
+        print("Usage: python user_node.py [CENTRAL_HOST] [CENTRAL_PORT] [MY_PORT] [FILE1] [FILE2] ...")
         sys.exit(1)
-    my_port = int(sys.argv[1])
-    my_files = sys.argv[2:]
-    main(my_port, my_files)
+    central_host = sys.argv[1]
+    central_port = int(sys.argv[2])
+    my_port = int(sys.argv[3])
+    my_files = sys.argv[4:]
+    main(central_host, central_port, my_port, my_files)

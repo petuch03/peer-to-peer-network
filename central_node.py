@@ -1,11 +1,11 @@
 import socket
+import sys
 import threading
 
 # Configuration for the central node
-HOST = '172.29.67.89'
-PORT = 9001
 
 peers = {}  # Example: { '192.168.1.1': {'port': 1234, 'files': ['file1.txt', 'file2.txt']} }
+
 
 def handle_client(conn, addr):
     with conn:
@@ -25,20 +25,28 @@ def handle_client(conn, addr):
                     conn.sendall(b'Deregistered')
                 print(f"Deregistered {addr}")
             elif data.startswith('query'):
-                response = str(len(peers)) + "::"
-                response += ', '.join(f"{peer}:{details['port']}:{','.join(details['files'])}" for peer, details in peers.items())
+                response = "Total peers:" + str(len(peers)) + "\nPeers:\n"
+                response += '\n'.join(
+                    f"{peer}:{details['port']}:{','.join(details['files'])}" for peer, details in peers.items())
                 conn.sendall(response.encode())
                 print(f"Queried by {addr}")
 
-def main():
+
+def main(central_host, central_port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((HOST, PORT))
+        s.bind((central_host, central_port))
         s.listen()
-        print(f"Central server listening on {HOST}:{PORT}")
+        print(f"Central server listening on {central_host}:{central_port}")
         while True:
             conn, addr = s.accept()
             thread = threading.Thread(target=handle_client, args=(conn, addr))
             thread.start()
 
+
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 2:
+        print("Usage: python user_node.py [CENTRAL_HOST] [CENTRAL_PORT]")
+        sys.exit(1)
+    central_host = sys.argv[1]
+    central_port = int(sys.argv[2])
+    main(central_host, central_port)
