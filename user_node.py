@@ -1,6 +1,7 @@
 import socket
 import sys
 import threading
+import multiprocessing
 
 LOCAL_HOST = '0.0.0.0'
 
@@ -75,7 +76,7 @@ def download_file_from_peer(ip, port, filename):
 
 
 def main(central_host, central_port, my_port, files):
-    file_server_thread = threading.Thread(target=start_file_server, args=(my_port,))
+    file_server_thread = multiprocessing.Process(target=start_file_server, args=(my_port,))
     file_server_thread.start()
 
     while True:
@@ -99,8 +100,10 @@ def main(central_host, central_port, my_port, files):
             ip, port = peer.split(':')
             download_file_from_peer(ip, int(port), filename)
         elif choice == '5':
+            deregister_with_central(central_host, central_port)
             print("Exiting program.")
-            break
+            file_server_thread.terminate()
+            exit(0)
         else:
             print("Invalid choice. Please enter a number from 1 to 5.")
 
