@@ -3,6 +3,7 @@ import sys
 import threading
 import multiprocessing
 from colorama import Fore
+import os
 
 LOCAL_HOST = '0.0.0.0'
 
@@ -80,7 +81,11 @@ def download_file_from_peer(ip, port, filename):
                 if not data:
                     break
                 f.write(data)
-        print(Fore.GREEN + f"Downloaded {filename} from {ip}:{port}" + Fore.RESET)
+        if os.stat(filename).st_size == 0:
+            print(Fore.RED + f"Incorrect filename: {filename} from {ip}:{port}" + Fore.RESET)
+            os.remove(filename)
+        else:
+            print(Fore.GREEN + f"Downloaded {filename} from {ip}:{port}" + Fore.RESET)
 
 
 def main(central_host, central_port, my_port, files):
